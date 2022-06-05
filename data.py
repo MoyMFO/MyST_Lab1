@@ -23,7 +23,7 @@ class DataPreparation:
 
     def order_books_json_transformation(self) -> dict:
         f = open(self.__filepath_or_buffer)
-        orderbooks_data = json.loads(f)
+        orderbooks_data = json.load(f)
         ob_data = orderbooks_data['bitfinex']
         #Drop None Keys
         ob_data = {i_key: i_value for i_key, i_value in ob_data.items() if i_value is not None}
