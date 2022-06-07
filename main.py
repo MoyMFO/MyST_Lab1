@@ -14,7 +14,7 @@ from functions import PublicTradesMeasures, OrderBookMeasures
 from data import DataPreparation
 
 
-# Instances: Data preparation (need to change data: commit test)
+# Instances: Data preparation (repo rename: commit test)
 public_trades_data = DataPreparation('btcusdt_binance.csv')
 public_trades_data = public_trades_data.public_trades_csv_transformation()
 
