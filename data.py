@@ -5,7 +5,7 @@
 # -- script: data.py : python script for data collection                                                 -- #
 # -- author: MoyMFO                                                                                      -- #
 # -- license: Public                                                                                     -- #
-# -- repository: https://github.com/MoyMFO/MyST_Lab1                                                     -- #
+# -- repository: https://github.com/MoyMFO/myst_mfo_lab1                                                 -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 import pandas as pd
@@ -13,16 +13,18 @@ import json
 
 class DataPreparation:
 
-    def __init__(self, filepath_or_buffer: str) -> pd.DataFrame:
-        self.__filepath_or_buffer = filepath_or_buffer
+    def __init__(self) -> None:
+        pass
 
-    def public_trades_csv_transformation(self) -> pd.DataFrame:
-        pt_data = pd.read_csv(self.__filepath_or_buffer, header=0)
+    @staticmethod
+    def public_trades_csv_transformation(filepath) -> pd.DataFrame:
+        pt_data = pd.read_csv(filepath, header=0)
         pt_data.index = pd.to_datetime(pt_data['timestamp'])
         return pt_data
 
-    def order_books_json_transformation(self) -> dict:
-        f = open(self.__filepath_or_buffer)
+    @staticmethod
+    def order_books_json_transformation(filepath) -> dict:
+        f = open(filepath)
         orderbooks_data = json.load(f)
         ob_data = orderbooks_data['bitfinex']
         #Drop None Keys

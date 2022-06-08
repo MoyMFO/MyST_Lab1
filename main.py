@@ -5,7 +5,7 @@
 # -- script: main.py : python script with the main functionality                                         -- #
 # -- author: MoyMFO                                                                                      -- #
 # -- license: Public                                                                                     -- #
-# -- repository: https://github.com/MoyMFO/MyST_Lab1                                                     -- #
+# -- repository: https://github.com/MoyMFO/myst_mfo_lab1                                                 -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 import pandas as pd
@@ -15,18 +15,22 @@ from data import DataPreparation
 
 
 # Instances: Data preparation (repo rename: commit test)
-public_trades_data = DataPreparation('btcusdt_binance.csv')
-public_trades_data = public_trades_data.public_trades_csv_transformation()
+data = DataPreparation()
 
-order_books_data = DataPreparation('orderbooks_05jul21.json')
-order_books_data = order_books_data.order_books_json_transformation()
+public_trades_data = data.public_trades_csv_transformation('btcusdt_binance.csv')
+
+order_books_data = data.order_books_json_transformation('orderbooks_05jul21.json')
 
 # Instances: Measures
 public_trades_measures = PublicTradesMeasures(public_trades_data)
 order_books_measures = OrderBookMeasures(order_books_data)
 
+#print(order_books_data)
 
-#print(public_trades_measures.trade_flow_imbalance(by='H'))
-#print(public_trades_measures.ohclvv(by='H'))
-print(order_books_measures.spread())
+#print(public_trades_measures.public_trades_stats(statistic_measure = 'Kurtosis', by='H'))
+#print(public_trades_measures.sell_trade_count(by='H'))
+#print(public_trades_measures.total_trade_count(by='H'))
+#print(order_books_measures.ob_imbalance_stats(statistic_measure='Mean', depth='full'))
+#print(order_books_measures.mid_price())
+#print(public_trades_measures.difference_trade_count(by='H'))
 
