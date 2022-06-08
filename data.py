@@ -12,18 +12,63 @@ import pandas as pd
 import json
 
 class DataPreparation:
+    """
+    This class contains methods to prepare orderbook data coming from JSON file 
+    and public trades data comming from CSV file.
+
+    Parameters
+    ------------
+    No required at initialization
+
+    Attributes
+    ------------
+    None
+    """
 
     def __init__(self) -> None:
         pass
 
     @staticmethod
     def public_trades_csv_transformation(filepath) -> pd.DataFrame:
+        """
+        This method prepare public trades data from a CSV file.
+
+        Parameters 
+        ----------
+        Required on calling:
+             filepath: CSV file path (default: None)
+                Public trades data, it should be a CSV following next structures:
+                'datetime': datetime to be typed as timestamp.
+                'price': price
+                'amount': traded volume
+                'side': sell or buy
+        Returns
+        ------
+        public trades data: DataFrame
+        """
         pt_data = pd.read_csv(filepath, header=0)
         pt_data.index = pd.to_datetime(pt_data['timestamp'])
         return pt_data
 
     @staticmethod
     def order_books_json_transformation(filepath) -> dict:
+        """
+        This method prepare public trades data from a CSV file.
+
+        Parameters 
+        ----------
+        Required on calling:
+             data_ob: JSON file path (default: None)
+                Orderbook data, it should be a JSON following next structures:
+                'datetime': datetime to be typed as timestamp.
+                'bid_size': bid levels volumes
+                'ask_size': ask levels volumes
+                'bid': bid levels prices
+                'ask': ask levels prices
+        Returns
+        ------
+        orderbooks data: dict
+        """
         f = open(filepath)
         orderbooks_data = json.load(f)
         ob_data = orderbooks_data['bitfinex']
