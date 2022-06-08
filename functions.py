@@ -1,10 +1,13 @@
-
 """
 # -- --------------------------------------------------------------------------------------------------- -- #
-# -- project: A SHORT DESCRIPTION OF THE PROJECT                                                         -- #
-# -- script: functions.py : python script with general functions                                         -- #
+# -- project: This project has been created for calculating measures of orderbooks and public trades. 
+#             It is used python as the programming language to implement theoretical measures that describe
+#             the market dynamic. Will be found some methods contained in classes for the orderbook and/or 
+#             public trade to be analyzed. Finally, there is a Jupyter notebook where all the measures
+              are implemented and a few graphics are displayed.                                          -- #
+# -- script: data.py : python script for data collection                                                 -- #
 # -- author: MoyMFO                                                                                      -- #
-# -- license: Public                                                                                     -- #
+# -- license: GNU General Public License v3.0                                                            -- #
 # -- repository: https://github.com/MoyMFO/myst_mfo_lab1                                                 -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """

@@ -1,6 +1,8 @@
 ## Description
-*Insert here a brief description of the project, including, purpose, technologies used and context 
-where it was created.*
+*This project has been created for calculating measures of orderbooks and public trades. It is used python as the 
+programming language to implement theoretical measures that describe the market dynamic. Will be found some methods contained
+in classes for the orderbook and/or public trade to be analyzed. Finally, there is a Jupyter notebook where all the measures
+are implemented and a few graphics are displayed.*
 
 ## Install dependencies
 
@@ -12,10 +14,34 @@ Or you can manually install one by one using the name and version in the file.
 
 ## Funcionalities
 
-*Add here examples of core functionalities for the project in this repository.*
+This project is about the calculation of plenty orderbook and public trades measures.
+
+### For orderbooks measures: 
+
+When a JSON files with orderbooks is provided we can get measures:
+
+### Instances: Data preparation
+data = DataPreparation()
+order_books_data = data.order_books_json_transformation('orderbooks_05jul21.json')
+### Instances: Measures
+order_books_measures = OrderBookMeasures(order_books_data)
+### Call measures
+order_books_measures.ohclvv('20T')
+
+### For public trades measures: 
+
+When a CSV file with public trades is provided we can get measures:
+
+### Instances: Data preparation
+data = DataPreparation()
+public_trades_data = data.public_trades_csv_transformation('btcusdt_binance.csv')
+### Instances: Measures
+public_trades_measures = PublicTradesMeasures(public_trades_data)
+### Call measures
+public_trades_measures.sell_trade_count(by='H')
 
 ## Author
-*Add Name and a brief description on who you are.*
+Moises Flores Ortiz. Student of financial engineering about to graduate.
 
 ## License
 **GNU General Public License v3.0** 
@@ -26,4 +52,4 @@ works using a licensed work, under the same license. Copyright and license notic
 must be preserved. Contributors provide an express grant of patent rights.*
 
 ## Contact
-*For more information in reggards of this repo, please contact name@email.com*
+*For more information in reggards of this repo, please contact if722183@iteso.mx*
