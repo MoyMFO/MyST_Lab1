@@ -31,6 +31,6 @@ order_books_measures = OrderBookMeasures(order_books_data)
 #print(public_trades_measures.sell_trade_count(by='H'))
 #print(public_trades_measures.total_trade_count(by='H'))
 #print(order_books_measures.ob_imbalance_stats(statistic_measure='Mean', depth='full'))
-#print(order_books_measures.mid_price())
+print(order_books_measures.ohclvv('20T'))
 #print(public_trades_measures.difference_trade_count(by='H'))
 

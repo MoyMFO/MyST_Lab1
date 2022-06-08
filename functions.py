@@ -50,10 +50,10 @@ class OrderBookMeasures:
         return ob_m2
 
     # -- Midprice -- #
-    def mid_price(self) -> list:
-        ob_m3 = [(self.data_ob[self.__ob_ts[0]]['ask'][0] 
-                + self.data_ob[self.__ob_ts[0]]['bid'][0])*0.5 
-                for i in range(0, len(self.__ob_ts))]
+    def mid_price(self) -> pd.DataFrame:
+        ob_m3 = [(self.data_ob[self.__ob_ts[i_ts]]['ask'][0] 
+                + self.data_ob[self.__ob_ts[i_ts]]['bid'][0])*0.5 
+                for i_ts in range(0, len(self.__ob_ts))]
         return ob_m3
 
     # -- No. Price Levels -- #
@@ -81,7 +81,7 @@ class OrderBookMeasures:
 
     # -- OrderBook Imbalance (v: volume, d: depth) -- #
     def ob_imbalance(self, depth: str or int) -> pd.DataFrame:
-        
+
         def __obimb(v, d): return np.sum(v.iloc[:d,0])/np.sum([v.iloc[:d,0], v.iloc[:d,1]]) 
         if depth == 'full':
             ob_m8 = [__obimb(self.data_ob[i_ts][['bid_size','ask_size']],
@@ -113,12 +113,13 @@ class OrderBookMeasures:
         return ob_m10
 
     def ohclvv(self, by: str) -> pd.DataFrame:
-        ohclvv = pd.DataFrame({'Open price': self.open_price(by), 
-                               'High price': self.high_price(by), 
-                               'Low price': self.low_price(by),
-                               'Close price': self.close_price(by),
-                               'Asset Volume': self.total_volume(by), 
-                               'Transaction Volume': self.total_trade_count(by)})
+        df_mid_price = pd.DataFrame({'mid price':self.mid_price()}, index=self.__l_ts)
+        ohclvv = pd.DataFrame({'Open price': df_mid_price['mid price'].resample(by, closed='left').first(), 
+                               'High price': df_mid_price['mid price'].resample(by, closed='left').max(), 
+                               'Low price': df_mid_price['mid price'].resample(by, closed='left').min(),
+                               'Close price': df_mid_price['mid price'].resample(by, closed='left').last(),
+                               'Asset Volume': df_mid_price['mid price'].resample(by, closed='left').sum(), 
+                               'Transaction Volume': df_mid_price['mid price'].resample(by, closed='left').count()})
         return ohclvv
 
     def ob_imbalance_stats(self, statistic_measure: str, depth: str) -> float:
@@ -148,8 +149,7 @@ class PublicTradesMeasures:
         return n_pt_data
 
     def difference_trade_count(self, by: str) -> pd.DataFrame:
-        trade_flow_imbalance = pd.DataFrame(self.pt_data[self.pt_data['side'] == "buy"]['side'].resample(by, closed='left').count() 
-                               - self.pt_data[self.pt_data['side'] == "sell"]['side'].resample(by, closed='left').count())
+        trade_flow_imbalance = pd.DataFrame(self.buy_trade_count(by) - self.sell_trade_count(by))
         return trade_flow_imbalance
     
     # -- Measures by asset volume & price -- #s
@@ -182,8 +182,7 @@ class PublicTradesMeasures:
         return c_pt_data
     
     def trade_flow_imbalance(self, by: str) -> pd.DataFrame:
-        trade_flow_imbalance = pd.DataFrame(self.pt_data[self.pt_data['side'] == "buy"]['amount'].resample(by, closed='left').sum() 
-                               - self.pt_data[self.pt_data['side'] == "sell"]['amount'].resample(by, closed='left').sum())
+        trade_flow_imbalance = pd.DataFrame(self.buy_volume(by) - self.sell_volume(by))
         return trade_flow_imbalance
     
     def ohclvv(self, by: str) -> pd.DataFrame:
