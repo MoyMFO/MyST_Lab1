@@ -17,23 +17,24 @@ from functions import PublicTradesMeasures, OrderBookMeasures, DataTransformatio
 from data import DataPreparation
 
 
-# Instances: Data preparation (repo rename: commit test)
+# Instances: Data preparation
 data = DataPreparation()
 
-public_trades_data = data.public_trades_csv_transformation('btcusdt_binance.csv')
+public_trades_data = data.public_trades_csv_transformation('files/btcusdt_binance.csv')
 
-order_books_data = data.order_books_json_transformation('orderbooks_05jul21.json')
+order_books_data = data.order_books_json_transformation('files/orderbooks_05jul21.json')
 
 # Instances: Measures
 public_trades_measures = PublicTradesMeasures(public_trades_data)
 order_books_measures = OrderBookMeasures(order_books_data)
 data_to_plot = DataTransformationToPlot()
-#print(order_books_data)
 
-#print(public_trades_measures.public_trades_stats(statistic_measure = 'Kurtosis', by='H'))
-#print(public_trades_measures.sell_trade_count(by='H'))
-#print(public_trades_measures.total_trade_count(by='H'))
-#print(order_books_measures.ob_imbalance_stats(statistic_measure='Mean', depth='full'))
-#print(order_books_measures.ohclvv('20T'))
-#print(public_trades_measures.difference_trade_count(by='H'))
+# Some measures displayed as a testing; All measures displayed on Jupyter notebook
+
+print(public_trades_measures.public_trades_stats(statistic_measure = 'Kurtosis', by='H'))
+print(public_trades_measures.sell_trade_count(by='H'))
+print(public_trades_measures.total_trade_count(by='H'))
+print(order_books_measures.ob_imbalance_stats(statistic_measure='Mean', depth='full'))
+print(order_books_measures.ohclvv('20T'))
+print(public_trades_measures.difference_trade_count(by='H'))
 print(data_to_plot.data_for_public_trades(public_trades_data))

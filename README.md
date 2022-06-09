@@ -40,6 +40,9 @@ public_trades_measures = PublicTradesMeasures(public_trades_data)
 ### Call measures
 public_trades_measures.sell_trade_count(by='H')
 
+### IMPORTANT:
+main.py only shows some measures as a testing/proof of working. Find all measures in the Jupyter notebook.
+
 ## Author
 Moises Flores Ortiz. Student of financial engineering about to graduate.
 

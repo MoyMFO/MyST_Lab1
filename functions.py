@@ -51,7 +51,7 @@ class OrderBookMeasures:
         return [pd.to_datetime(i_ts) for i_ts in self.__ob_ts]
 
     # -- Median Time of OrderBook update -- #
-    def meadian_time_ob(self) -> float:
+    def median_time_ob(self) -> float:
         """
         This method caculates the median time of orderbook update.
 
@@ -68,7 +68,7 @@ class OrderBookMeasures:
         return ob_m1
 
     # -- Spread -- #
-    def spread(self) -> list:
+    def spread(self) -> pd.DataFrame:
         """
         This method caculates the spread of top of the book.
 
@@ -80,11 +80,11 @@ class OrderBookMeasures:
 
         Returns
         ------
-        Spread: list
+        Spread: DataFrame
         """
-        ob_m2 = [self.data_ob[self.__ob_ts[0]]['ask'][0] 
-                 - self.data_ob[self.__ob_ts[0]]['bid'][0] 
-                for i in range(0, len(self.__ob_ts))]
+        ob_m2 = pd.DataFrame({'Spread':[(self.data_ob[self.__ob_ts[i_ts]]['ask'][0] 
+                              - self.data_ob[self.__ob_ts[i_ts]]['bid'][0]) 
+                              for i_ts in range(0, len(self.__ob_ts))]})
         return ob_m2
 
     # -- Midprice -- #
@@ -105,10 +105,10 @@ class OrderBookMeasures:
         ob_m3 = [(self.data_ob[self.__ob_ts[i_ts]]['ask'][0] 
                 + self.data_ob[self.__ob_ts[i_ts]]['bid'][0])*0.5 
                 for i_ts in range(0, len(self.__ob_ts))]
-        return ob_m3
+        return pd.DataFrame({'mid_price':ob_m3})
 
     # -- No. Price Levels -- #
-    def price_levels(self) -> list:
+    def price_levels(self) -> pd.DataFrame:
         """
         This method caculates the price leves of the orderbook.
 
@@ -119,13 +119,13 @@ class OrderBookMeasures:
             __ob_ts: list of timestamps of orderbooks.
 
         Returns
-        Price leves: list
+        Price leves: DataFrame
         """
         ob_m4 = [self.data_ob[i_ts].shape[0] for i_ts in self.__ob_ts]
-        return ob_m4
+        return pd.DataFrame({'price_levels':ob_m4})
 
      # -- Bid_Volume -- #
-    def bid_volume(self) -> list:
+    def bid_volume(self) -> pd.DataFrame:
         """
         This method caculates the bid volume of the orderbook.
 
@@ -137,14 +137,14 @@ class OrderBookMeasures:
 
         Returns
         ------
-        Bid volume: list
+        Bid volume: DataFrame
         """
         ob_m5 = [np.round(self.data_ob[i_ts]['bid_size'].sum(), 6) 
                  for i_ts in self.__ob_ts]
-        return ob_m5
+        return pd.DataFrame({'bid_volume':ob_m5})
 
      # -- Ask_Volume -- #
-    def ask_volume(self) -> list:
+    def ask_volume(self) -> pd.DataFrame:
         """
         This method caculates the ask volume of the orderbook.
 
@@ -156,14 +156,14 @@ class OrderBookMeasures:
 
         Returns
         ------
-        Ask volume: list
+        Ask volume: DataFrame
         """
         ob_m6 = [np.round(self.data_ob[i_ts]['ask_size'].sum(), 6) 
                 for i_ts in self.__ob_ts]
-        return ob_m6
+        return pd.DataFrame({'ask_volume':ob_m6})
 
      # -- Total_Volume -- #
-    def total_volume(self) -> list:
+    def total_volume(self) -> pd.DataFrame:
         """
         This method caculates the total volume of the orderbook.
 
@@ -175,11 +175,11 @@ class OrderBookMeasures:
 
         Returns
         ------
-        Total volume: list
+        Total volume: DataFrame
         """
         ob_m7 = [np.round(self.data_ob[i_ts]['bid_size'].sum() 
                  + self.data_ob[i_ts]['ask_size'].sum(), 6) for i_ts in self.__ob_ts]
-        return ob_m7
+        return pd.DataFrame({'total_volume':ob_m7})
 
     # -- OrderBook Imbalance (v: volume, d: depth) -- #
     def ob_imbalance(self, depth: str or int='full') -> pd.DataFrame:
@@ -205,10 +205,10 @@ class OrderBookMeasures:
         else:
             ob_m8 = [__obimb(self.data_ob[i_ts][['bid_size','ask_size']], 
             depth) for i_ts in self.__ob_ts]
-        return pd.DataFrame(ob_m8)
+        return pd.DataFrame({'ob_imbalance': ob_m8})
 
-    # -- wighted-Midprice (p: price, v: volume) -- #
-    def w_midprice(self) -> list:
+     # -- wighted-Midprice (p: price, v: volume) -- A option#
+    def w_midprice_a(self, depth: str or int='full') -> pd.DataFrame:
         """
         This method caculates the weighted midprice of the orderbook.
 
@@ -219,15 +219,34 @@ class OrderBookMeasures:
 
         Returns
         ------
-        Weighted Midprice: list
+        Weighted Midprice: DataFrame
+        """
+        ob_m8 = self.ob_imbalance(depth=depth)['ob_imbalance'].values.tolist()
+        ob_m3 = self.mid_price()['mid_price'].values.tolist()
+        ob_m9 = [ob_m8[i_ts] * ob_m3[i_ts] for i_ts in range(0, len(self.__ob_ts))]
+        return pd.DataFrame({'wighted_midprice':ob_m9})
+
+    # -- wighted-Midprice (p: price, v: volume) -- B option#
+    def w_midprice_b(self) -> pd.DataFrame:
+        """
+        This method caculates the weighted midprice of the orderbook.
+
+        Parameters 
+        ----------
+        Initialized on instance:
+            data_ob: orderbook data.
+
+        Returns
+        ------
+        Weighted Midprice: DataFrame
         """
         def __w_midprice(p, v): return ((v.iloc[0,1]/np.sum([v.iloc[0,0], v.iloc[0,1]]))*p.iloc[0,0] 
                                        + (v.iloc[0,0]/np.sum([v.iloc[0,0], v.iloc[0,1]]))*p.iloc[0,1])
         ob_m9  = [__w_midprice(self.data_ob[i_ts][['bid','ask']], self.data_ob[i_ts][['bid_size', 'ask_size']]) for i_ts in self.__ob_ts]
-        return ob_m9
+        return pd.DataFrame({'weighted_midprice':ob_m9})
 
     # -- VWAP (Volume-Weighted Average Price) (p: price, v: volume, d:depth) -- #
-    def vwap(self, depth: str or int='full') -> list:
+    def vwap(self, depth: str or int='full') -> pd.DataFrame:
         """
         This method caculates the Volume-Weighted Average Price of the orderbook.
 
@@ -241,7 +260,7 @@ class OrderBookMeasures:
             Depth: str or int. 'full' for the complete orderbook depth or int opcional depth.
         Returns
         ------
-        VWAP: list
+        VWAP: DataFrame
         """
 
         def __vwap_calculation(p, v, d): return (np.sum(p.iloc[:d, 0] * v.iloc[:d,0] + p.iloc[:d,1] * v.iloc[:d,1]) 
@@ -252,7 +271,7 @@ class OrderBookMeasures:
         else:
             ob_m10 = [__vwap_calculation(self.data_ob[i_ts][['bid', 'ask']], self.data_ob[i_ts][['bid_size', 'ask_size']], 
                      depth) for i_ts in self.__ob_ts]
-        return ob_m10
+        return pd.DataFrame({'vwap':ob_m10})
 
     def ohclvv(self, by: str) -> pd.DataFrame:
         """
@@ -266,7 +285,7 @@ class OrderBookMeasures:
         ------
         OHCLVV: DataFrame
         """
-        df_mid_price = pd.DataFrame({'mid price':self.mid_price()}, index=self.__l_ts)
+        df_mid_price = pd.DataFrame({'mid price':self.mid_price()['mid_price'].values.tolist()}, index=self.__l_ts)
         ohclvv = pd.DataFrame({'Open price': df_mid_price['mid price'].resample(by, closed='left').first(), 
                                'High price': df_mid_price['mid price'].resample(by, closed='left').max(), 
                                'Low price': df_mid_price['mid price'].resample(by, closed='left').min(),
@@ -282,18 +301,26 @@ class OrderBookMeasures:
         Parameters 
         ----------
         Required on calling:
-            static_measure: str. Mean, Variance, Skew, Kurtosis.
+            static_measure: str. Median, Variance, Skew, Kurtosis.
             Depth: str or int. 'full' for the complete orderbook depth or int opcional depth.
         Returns
         ------
         ob desired stat: float 
         """
-        ob_imbalance = self.ob_imbalance(depth=depth)
+        ob_imbalance = pd.DataFrame(self.ob_imbalance(depth=depth))
         stats = {
-            'Mean': ob_imbalance.mean()[0], 'Variance': ob_imbalance.var()[0],
+            'Median': ob_imbalance.median()[0], 'Variance': ob_imbalance.var()[0],
             'Skew': ob_imbalance.skew()[0], 'Kurtosis': ob_imbalance.kurtosis()[0]
         }
         return stats[statistic_measure]
+
+    def data_to_plot(self) -> pd.DataFrame:
+      
+        data_to_plot = pd.DataFrame({'ask':[self.data_ob[self.__ob_ts[i_ts]]['ask'][0] for i_ts in range(0, 7)],
+                                     'bid': [self.data_ob[self.__ob_ts[i_ts]]['bid'][0] for i_ts in range(0, 7)],
+                                     'ask_size': [self.data_ob[self.__ob_ts[i_ts]]['ask_size'][0] for i_ts in range(0, 7)],
+                                     'bid_size': [self.data_ob[self.__ob_ts[i_ts]]['bid_size'][0] for i_ts in range(0, 7)]})
+        return data_to_plot
 
 
 class PublicTradesMeasures:
@@ -321,7 +348,7 @@ class PublicTradesMeasures:
         self.pt_data = pt_data
 
     # -- Measures by transaction count -- #
-    def buy_trade_count(self, by: str) -> pd.Series:
+    def buy_trade_count(self, by: str) -> pd.DataFrame:
         """
         This method caculates the buy trade count of public trades.
 
@@ -334,12 +361,12 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        buy trade count: Series
+        buy trade count: DataFrame
         """
         buy_trade_count = self.pt_data[self.pt_data['side'] == 'buy']['side'].resample(by, closed='left').count() 
-        return buy_trade_count
+        return pd.DataFrame({'buy_trade_count': buy_trade_count})
 
-    def sell_trade_count(self, by: str) -> pd.Series:
+    def sell_trade_count(self, by: str) -> pd.DataFrame:
         """
         This method caculates the sell trade count of public trades.
 
@@ -352,12 +379,12 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        sell trade count: Series
+        sell trade count: DataFrame
         """
         sell_trade_count = self.pt_data[self.pt_data['side'] == 'sell']['side'].resample(by, closed='left').count()
-        return sell_trade_count      
+        return pd.DataFrame({'sell_trade_count':sell_trade_count})      
 
-    def total_trade_count(self, by: str) -> pd.Series:
+    def total_trade_count(self, by: str) -> pd.DataFrame:
         """
         This method caculates the total trade count of public trades.
 
@@ -370,10 +397,10 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        total trade count: Series
+        total trade count: DataFrame
         """
         n_pt_data = self.pt_data['side'].resample(by, closed='left').count()
-        return n_pt_data
+        return pd.DataFrame({'total_trade_count':n_pt_data})
 
     def difference_trade_count(self, by: str) -> pd.DataFrame:
         """
@@ -390,11 +417,11 @@ class PublicTradesMeasures:
         ------
         difference buy-sell trade count: DataFrame
         """
-        trade_flow_imbalance = pd.DataFrame(self.buy_trade_count(by) - self.sell_trade_count(by))
-        return trade_flow_imbalance
+        trade_flow_imbalance = (self.buy_trade_count(by)['buy_trade_count'] - self.sell_trade_count(by)['sell_trade_count'])
+        return pd.DataFrame({'difference_trade_count': trade_flow_imbalance})
     
     # -- Measures by asset volume & price -- #s
-    def buy_volume(self, by: str) -> pd.Series:
+    def buy_volume(self, by: str) -> pd.DataFrame:
         """
         This method caculates the buy asset volume of public trades.
 
@@ -410,9 +437,9 @@ class PublicTradesMeasures:
         buy asset volume: Series
         """
         buy_volume = self.pt_data[self.pt_data['side'] == 'buy']['amount'].resample(by, closed='left').sum() 
-        return buy_volume
+        return pd.DataFrame({'buy_volume': buy_volume})
 
-    def sell_volume(self, by: str) -> pd.Series:
+    def sell_volume(self, by: str) -> pd.DataFrame:
         """
         This method caculates the sell asset volume of public trades.
 
@@ -428,9 +455,9 @@ class PublicTradesMeasures:
         sell asset volume: Series
         """
         sell_volume = self.pt_data[self.pt_data['side'] == 'sell']['amount'].resample(by, closed='left').sum() 
-        return sell_volume    
+        return pd.DataFrame({'sell_volume':sell_volume})    
 
-    def total_volume(self, by: str) -> pd.Series:
+    def total_volume(self, by: str) -> pd.DataFrame:
         """
         This method caculates the total asset volume of public trades.
 
@@ -446,9 +473,9 @@ class PublicTradesMeasures:
         total asset volume: Series
         """
         v_pt_data = self.pt_data['amount'].resample(by, closed='left').sum()
-        return v_pt_data
+        return pd.DataFrame({'total_volume':v_pt_data})
 
-    def high_price(self, by: str) -> pd.Series:
+    def high_price(self, by: str) -> pd.DataFrame:
         """
         This method caculates the high price by resampling of public trades.
 
@@ -461,12 +488,12 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        high price: Series
+        high price: DataFrame
         """
         h_pt_data = self.pt_data['price'].resample(by, closed='left').max()
-        return h_pt_data
+        return pd.DataFrame({'high_price':h_pt_data})
     
-    def low_price(self, by: str) -> pd.Series:
+    def low_price(self, by: str) -> pd.DataFrame:
         """
         This method caculates the low price by resampling of public trades.
 
@@ -479,12 +506,12 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        low price: Series
+        low price: DataFrame
         """
         l_pt_data = self.pt_data['price'].resample(by, closed='left').min()
-        return l_pt_data
+        return pd.DataFrame({'low_price':l_pt_data})
 
-    def open_price(self, by: str) -> pd.Series:
+    def open_price(self, by: str) -> pd.DataFrame:
         """
         This method caculates the open price by resampling of public trades.
 
@@ -497,12 +524,12 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        open price: Series
+        open price: DataFrame
         """
         o_pt_data = self.pt_data['price'].resample(by, closed='left').first()
-        return o_pt_data
+        return pd.DataFrame({'open_price':o_pt_data})
 
-    def close_price(self, by: str) -> pd.Series:
+    def close_price(self, by: str) -> pd.DataFrame:
         """
         This method caculates the close price by resampling of public trades.
 
@@ -515,10 +542,10 @@ class PublicTradesMeasures:
 
         Returns
         ------
-        close price: Series
+        close price: DataFrame
         """
         c_pt_data = self.pt_data['price'].resample(by, closed='left').last()
-        return c_pt_data
+        return pd.DataFrame({'close_price':c_pt_data})
     
     def trade_flow_imbalance(self, by: str) -> pd.DataFrame:
         """
@@ -535,7 +562,7 @@ class PublicTradesMeasures:
         ------
         trade flow imbalance: Series
         """
-        trade_flow_imbalance = pd.DataFrame(self.buy_volume(by) - self.sell_volume(by))
+        trade_flow_imbalance = pd.DataFrame({'trade_flow_imbalance':self.buy_volume(by)['buy_volume'] - self.sell_volume(by)['sell_volume']})
         return trade_flow_imbalance
     
     def ohclvv(self, by: str) -> pd.DataFrame:
@@ -550,14 +577,14 @@ class PublicTradesMeasures:
         ------
         OHCLVV: DataFrame
         """
-        ohclvv = pd.DataFrame({'Open price': self.open_price(by), 'High price': self.high_price(by), 
-                               'Low price': self.low_price(by),'Close price': self.close_price(by),
-                               'Asset Volume': self.total_volume(by), 'Transaction Volume': self.total_trade_count(by)})
+        ohclvv = pd.DataFrame({'Open price': self.open_price(by)['open_price'], 'High price': self.high_price(by)['high_price'], 
+                               'Low price': self.low_price(by)['low_price'],'Close price': self.close_price(by)['close_price'],
+                               'Asset Volume': self.total_volume(by)['total_volume'], 'Transaction Volume': self.total_trade_count(by)['total_trade_count']})
         return ohclvv
 
     def public_trades_stats(self, statistic_measure: str, by: str) -> float:
         """
-        This method caculates public trade price stats: Mean, Variance, Skew, and Kurtosis.
+        This method caculates public trade price stats: Median, Variance, Skew, and Kurtosis.
 
         Parameters 
         ----------
@@ -570,15 +597,11 @@ class PublicTradesMeasures:
         """
         trade_flow_imbalance = self.trade_flow_imbalance(by)
         stats = {
-            'Mean': trade_flow_imbalance.mean()[0], 'Variance': trade_flow_imbalance.var()[0],
+            'Median': trade_flow_imbalance.median()[0], 'Variance': trade_flow_imbalance.var()[0],
             'Skew': trade_flow_imbalance.skew()[0], 'Kurtosis': trade_flow_imbalance.kurtosis()[0]
         }
         return stats[statistic_measure]
 
 
-class DataTransformationToPlot:
-
-    @staticmethod
-    def data_for_public_trades(data) -> pd.DataFrame:
-        pt_data = data.groupby('price').resample('1T')['amount'].sum()
-        return pt_data
+         
+    
